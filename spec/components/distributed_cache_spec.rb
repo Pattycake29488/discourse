@@ -11,6 +11,19 @@ describe DistributedCache do
     DistributedCache.new("test")
   end
 
+  it 'does not leak state across caches' do
+    c2 = DistributedCache.new("test1")
+    c3 = DistributedCache.new("test1")
+    c2["hi"] = "hi"
+    wait_for do
+      c3["hi"] == "hi"
+    end
+
+    Thread.pass
+    cache1["hi"].should == nil
+
+  end
+
   it 'allows coerces symbol keys to strings' do
     cache1[:key] = "test"
     cache1["key"].should == "test"
